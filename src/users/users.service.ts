@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dto';
+import { LoginInput } from './dtos/login-dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -27,6 +28,27 @@ export class UsersService {
       return { ok: true };
     } catch (e) {
       return { ok: false, error: "Couldn't create account" };
+    }
+  }
+
+  async login({
+    email,
+    password,
+  }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
+    // find the user with the email
+    // check if the password id correct
+    // make a JWT and give it to user
+    try {
+      const user = await this.users.findOne({ email });
+      if (!user) return { ok: false, error: 'User Not Found' };
+      const checkPassword = await user.checkPassword(password);
+      if (!checkPassword) return { ok: false, error: 'Wrong Password' };
+      return { ok: true, token: 'token' };
+    } catch (e) {
+      return {
+        ok: false,
+        error: e,
+      };
     }
   }
 }
