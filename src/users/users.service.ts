@@ -6,6 +6,7 @@ import { LoginInput } from './dtos/login-dto';
 import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import { DeleteAccountOutput } from './dtos/delete-account.dto';
 
 @Injectable()
 export class UsersService {
@@ -69,5 +70,14 @@ export class UsersService {
     if (password) user.password = password;
 
     return await this.users.save(user);
+  }
+
+  async deleteAccount(userId: number): Promise<boolean> {
+    try {
+      await this.users.delete(userId);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
