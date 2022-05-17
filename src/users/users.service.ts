@@ -72,12 +72,7 @@ export class UsersService {
     return await this.users.save(user);
   }
 
-  async deleteAccount(userId: number): Promise<boolean> {
-    try {
-      await this.users.delete(userId);
-      return true;
-    } catch (error) {
-      return false;
-    }
+  async deleteAccount(userId: number): Promise<void> {
+    await this.users.delete(userId);
   }
 }
