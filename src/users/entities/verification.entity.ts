@@ -18,6 +18,6 @@ export class Verification extends CoreEntity {
 
   @BeforeInsert()
   createCode(): void {
-    this.code = uuidv4().substring(0, 6).toUpperCase();
+    this.code = uuidv4();
   }
 }
