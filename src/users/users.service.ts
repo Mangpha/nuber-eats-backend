@@ -70,7 +70,7 @@ export class UsersService {
     } catch (e) {
       return {
         ok: false,
-        error: e,
+        error: "Can't log user in",
       };
     }
   }
@@ -78,6 +78,7 @@ export class UsersService {
   async findById(id: number): Promise<UserProfileOutput> {
     try {
       const user = await this.users.findOneOrFail({ id });
+      return { ok: true, user };
     } catch (error) {
       return {
         ok: false,
