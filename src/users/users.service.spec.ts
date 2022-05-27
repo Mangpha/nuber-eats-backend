@@ -12,6 +12,7 @@ const mockRepository = () => ({
   save: jest.fn(),
   create: jest.fn(),
   findOneOrFail: jest.fn(),
+  delete: jest.fn(),
 });
 
 const mockJwtService = () => ({
@@ -260,6 +261,12 @@ describe('UserService', () => {
       });
     });
   });
-  it.todo('deleteAccount');
+  describe('deleteAccount', () => {
+    it('should fail on exception', async () => {
+      usersRepository.delete.mockRejectedValue(new Error());
+      const result = await service.deleteAccount(1);
+      expect(result).toEqual({ ok: false, error: 'Could not delete account' });
+    });
+  });
   it.todo('verifyEmail');
 });
