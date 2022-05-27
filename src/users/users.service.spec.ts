@@ -172,7 +172,8 @@ describe('UserService', () => {
     });
   });
 
-  it.todo('findById');
+  describe('findById', () => {});
+
   it.todo('editProfile');
   it.todo('deleteAccount');
   it.todo('verifyEmail');
