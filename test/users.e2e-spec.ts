@@ -213,7 +213,54 @@ describe('UserModule (e2e)', () => {
     });
   });
 
-  it.todo('me');
+  describe('me', () => {
+    it('should find my profile', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .set('x-jwt', jwtToken)
+        .send({
+          query: `{
+          me {
+            email
+          }
+        }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res;
+          expect(email).toBe(TEST_USER.email);
+        });
+    });
+
+    it('should not allow logged out user', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .send({
+          query: `{
+          me {
+            email
+          }
+        }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              errors: [{ message }],
+            },
+          } = res;
+
+          expect(message).toBe('Forbidden resource');
+        });
+    });
+  });
+
   it.todo('verifyEmail');
   it.todo('editProfile');
   it.todo('deleteAccount');
