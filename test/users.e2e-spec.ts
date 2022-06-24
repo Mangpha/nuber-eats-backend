@@ -261,7 +261,60 @@ describe('UserModule (e2e)', () => {
     });
   });
 
+  describe('editProfile', () => {
+    const NEW_EMAIL = 'fixProfile@e2e.test';
+    it('should change email', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .set('x-jwt', jwtToken)
+        .send({
+          query: `mutation {
+            editProfile(input: {
+              email: "${NEW_EMAIL}"
+            }) {
+              ok
+              error
+            }
+          }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBeTruthy();
+          expect(error).toBe(null);
+        });
+    });
+    it('should have new email', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .set('x-jwt', jwtToken)
+        .send({
+          query: `{
+          me {
+            email
+          }
+        }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res;
+          expect(email).toBe(NEW_EMAIL);
+        });
+    });
+  });
+
   it.todo('verifyEmail');
-  it.todo('editProfile');
   it.todo('deleteAccount');
 });
