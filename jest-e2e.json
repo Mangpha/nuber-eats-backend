@@ -11,5 +11,11 @@
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/src/$1"
   },
-  "collectCoverageFrom": ["**/*.service.(t|j)s"]
+  "collectCoverageFrom": ["**/*.service.(t|j)s"],
+  "coveragePathIgnorePatterns": [
+    "node_modules",
+    ".entity.ts",
+    ".constants.ts",
+    "dist"
+  ]
 }
