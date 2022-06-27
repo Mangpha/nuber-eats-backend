@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module';
 import { getConnection, Repository } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Verification } from 'src/users/entities/verification.entity';
 
 jest.mock('got', () => {
   return {
@@ -21,6 +22,7 @@ const TEST_USER = {
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
   let usersRepository: Repository<User>;
+  let verificationRepository: Repository<Verification>;
   let jwtToken: string;
 
   beforeAll(async () => {
@@ -30,6 +32,9 @@ describe('UserModule (e2e)', () => {
 
     app = module.createNestApplication();
     usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    verificationRepository = module.get<Repository<Verification>>(
+      getRepositoryToken(Verification),
+    );
     await app.init();
   });
 
@@ -315,6 +320,129 @@ describe('UserModule (e2e)', () => {
     });
   });
 
-  it.todo('verifyEmail');
-  it.todo('deleteAccount');
+  describe('verifyEmail', () => {
+    let verificationCode: string;
+
+    beforeAll(async () => {
+      const [verification] = await verificationRepository.find();
+      verificationCode = verification.code;
+    });
+
+    it('should verify email', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .send({
+          query: `mutation {
+            verifyEmail(input: {
+              code : "${verificationCode}"
+            }) {
+              ok
+              error
+            }
+          }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                verifyEmail: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBeTruthy();
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should fail on wrong verification code', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .send({
+          query: `mutation {
+            verifyEmail(input: {
+              code : "false"
+            }) {
+              ok
+              error
+            }
+          }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                verifyEmail: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBeFalsy();
+          expect(error).toEqual(expect.any(String));
+        });
+    });
+  });
+
+  describe('deleteAccount', () => {
+    let userId: number;
+    beforeAll(async () => {
+      const [user] = await usersRepository.find();
+      userId = user.id;
+    });
+
+    it('should be delete account', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .set('x-jwt', jwtToken)
+        .send({
+          query: `mutation {
+            deleteAccount {
+              ok
+              error
+            }
+          }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                deleteAccount: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBeTruthy();
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should be not found account after delete account', () => {
+      return request(app.getHttpServer())
+        .post(ENDPOINT)
+        .set('x-jwt', jwtToken)
+        .send({
+          query: `{
+            me {
+              id
+            }
+          }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              errors: [
+                {
+                  extensions: {
+                    response: { statusCode, message },
+                  },
+                },
+              ],
+            },
+          } = res;
+          expect(message).toEqual('Forbidden resource');
+          expect(statusCode).toBe(403);
+        });
+    });
+  });
 });
