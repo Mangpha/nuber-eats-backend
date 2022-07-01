@@ -10,7 +10,6 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { UsersModule } from './users/users.module';
-import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
@@ -66,6 +65,7 @@ import { RestaurantsModule } from './restaurants/restaurants.module';
     }),
     UsersModule,
     RestaurantsModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
