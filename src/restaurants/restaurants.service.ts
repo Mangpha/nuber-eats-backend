@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DeleteAccountOutput } from 'src/users/dtos/delete-account.dto';
 import { User } from 'src/users/entities/user.entity';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -18,8 +19,10 @@ import { RestaurantRepository } from './repositories/restaurant.repository';
 export class RestaurantService {
   constructor(
     private readonly restaurants: RestaurantRepository,
-    private readonly category: CategoryRepository,
+    private readonly categories: CategoryRepository,
   ) {}
+
+  // Restaurant Service
 
   async createRestaurant(
     owner: User,
@@ -28,7 +31,7 @@ export class RestaurantService {
     try {
       const newRestaurant = this.restaurants.create(createRestaurantInput);
       newRestaurant.owner = owner;
-      const category = await this.category.getOrCreate(
+      const category = await this.categories.getOrCreate(
         createRestaurantInput.categoryName,
       );
       newRestaurant.category = category;
@@ -56,7 +59,7 @@ export class RestaurantService {
       if (!check.ok) return check;
       let category: Category = null;
       if (editRestaurantInput.categoryName) {
-        category = await this.category.getOrCreate(
+        category = await this.categories.getOrCreate(
           editRestaurantInput.categoryName,
         );
       }
@@ -87,5 +90,23 @@ export class RestaurantService {
     } catch (e) {
       return { ok: false, error: 'Could not delete restaurant' };
     }
+  }
+
+  // Category Service
+
+  async allCategories(): Promise<AllCategoriesOutput> {
+    try {
+      const categories = await this.categories.find();
+      return { ok: true, categories };
+    } catch {
+      return {
+        ok: false,
+        error: 'Could not load categories',
+      };
+    }
+  }
+
+  async countRestaurants(category: Category): Promise<number> {
+    return await this.restaurants.count({ category });
   }
 }
