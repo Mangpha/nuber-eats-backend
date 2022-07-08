@@ -16,4 +16,7 @@ export class RestaurantRepository extends Repository<Restaurant> {
       };
     return { ok: true };
   }
+
+  // async findAndPagination()
+  // async findCountAndPagination()
 }
