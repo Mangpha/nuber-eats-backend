@@ -131,7 +131,7 @@ export class RestaurantService {
     try {
       const category = await this.categories.findOne({ slug });
       if (!category) return { ok: false, error: 'Category not found' };
-      const restaurant = await this.restaurants.find({
+      const restaurants = await this.restaurants.find({
         where: {
           category,
         },
@@ -141,9 +141,14 @@ export class RestaurantService {
         take: 25,
         skip: (page - 1) * 25,
       });
-      category.restaurants = restaurant;
       const totalResults = await this.countRestaurants(category);
-      return { ok: true, category, totalPages: Math.ceil(totalResults / 25) };
+      return {
+        ok: true,
+        restaurants,
+        category,
+        totalPages: Math.ceil(totalResults / 25),
+        totalResults,
+      };
     } catch {
       return { ok: false, error: 'Could not load category' };
     }
