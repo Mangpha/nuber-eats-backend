@@ -93,6 +93,8 @@ export class UsersService {
   ): Promise<EditProfileOutput> {
     try {
       const user = await this.users.findOne(userId);
+      const existEmail = await this.users.findOne({ email });
+      if (existEmail) return { ok: false, error: 'Email exist' };
       if (email) {
         user.email = email;
         user.verified = false;
