@@ -104,7 +104,7 @@ export class RestaurantResolver {
   @Role(['Owner'])
   myRestaurant(
     @AuthUser() owner: User,
-    myRestaurantInput: MyRestaurantInput,
+    @Args('input') myRestaurantInput: MyRestaurantInput,
   ): Promise<MyRestaurantOutput> {
     return this.restaurantService.myRestaurant(owner, myRestaurantInput);
   }
