@@ -54,6 +54,11 @@ import { Context } from 'apollo-server-core';
             extra.token = connectionParams['x-jwt'];
           },
         },
+        'subscriptions-transport-ws': {
+          onConnect: (connectionParams) => {
+            return { token: connectionParams['x-jwt'] };
+          },
+        },
       },
       driver: ApolloDriver,
       autoSchemaFile: true,
