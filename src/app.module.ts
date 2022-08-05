@@ -1,10 +1,5 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,7 +7,6 @@ import * as Joi from 'joi';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
-import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Verification } from './users/entities/verification.entity';
 import { MailModule } from './mail/mail.module';
@@ -28,6 +22,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { Payment } from './payments/entities/payment.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UploadsModule } from './uploads/uploads.module';
+import { Context } from 'apollo-server-core';
 
 @Module({
   imports: [
@@ -53,17 +48,19 @@ import { UploadsModule } from './uploads/uploads.module';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       subscriptions: {
-        'subscriptions-transport-ws': {
-          onConnect: (connectionParams: any) => {
-            const token = connectionParams['x-jwt'];
-            if (!token) throw new Error('Token is not valid');
-            return { token };
+        'graphql-ws': {
+          onConnect: (context: Context<any>) => {
+            const { connectionParams, extra } = context;
+            extra.token = connectionParams['x-jwt'];
           },
         },
       },
       driver: ApolloDriver,
       autoSchemaFile: true,
-      context: ({ req }) => ({ token: req.headers['x-jwt'] }),
+      context: ({ req, extra }) => {
+        if (extra) return { token: extra.token };
+        else return { token: req.headers['x-jwt'] };
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
